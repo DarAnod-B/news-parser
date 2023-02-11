@@ -12,17 +12,17 @@ import pandas as pd
 import openai
 import time
 import nltk
+
 nltk.download('punkt')
 
 
 openai.api_key = r''
-headline_lists = ['H1', 'H2']
-
-
 # Файл, полученный в Google Developer Console
 CREDENTIALS_FILE = r''
 # ID Google Sheets документа (можно взять из его URL)
 SPREADSHEET_ID = r''
+
+headline_lists = ['H1', 'H2']
 
 
 class DutchnewsPipeline:
@@ -45,7 +45,7 @@ class DutchnewsPipeline:
             list_English = []
 
             for type_cell, options_cell, english_cell in zip(item['Type'], item['Options'], item['English']):
-                if options_cell in headline_lists or type_cell in 'H':
+                if options_cell in headline_lists or type_cell in ['H', 'DATE']:
                     list_type.append(type_cell)
                     list_options.append(options_cell)
                     list_English.append(english_cell)
@@ -81,7 +81,7 @@ class DutchnewsPipeline:
         def text_rewriting(item):
             count = 0
             for english_cell, options_cell, type_cell in zip(item['English'], item['Options'], item['Type']):
-                if options_cell not in headline_lists and type_cell != 'H':
+                if options_cell not in headline_lists and type_cell not in ['H', 'DATE']:
                     status = 'Not completed'
                     rate_limit_retry_count = 10
                     prompt = "Rewrite the following sentence, except quotes, add more uniqueness, the text should deceive the anti-plagiarism service: \n" + english_cell

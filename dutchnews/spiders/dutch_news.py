@@ -9,6 +9,7 @@ class Xpath(Enum):
     element_p = r'//div[contains(@class, "entry-content ")]/p'
     elements_containing_text = r'./text() | a/text() | ./strong/text()'
     text_inside_paragraphs = r'./text() | a/text()'
+    news_release_date = r'//header/div/span/text()'
 
 
 class DutchNewsSpider(scrapy.Spider):
@@ -19,15 +20,11 @@ class DutchNewsSpider(scrapy.Spider):
     custom_settings = {'FEED_URI': 'dutchnews_%(time)s.xlsx',
                        'FEED_FORMAT': 'xlsx'}
 
-
-
     def parse(self, response):
         # follow the list of links to news categories
         links = response.xpath(Xpath.news_categories.value).getall()
         for link in links:
             yield response.follow(link, self.parse_news)
-
-
 
     def parse_news(self, response):
         # extract the text from the header of each news article
@@ -47,9 +44,13 @@ class DutchNewsSpider(scrapy.Spider):
         # extract the text and tag from the header
         header_text = response.xpath(Xpath.text_header.value).get()
         filling_dictionary_by_rows(item, 'H', '', header_text)
-        filling_dictionary_by_rows(item, 'T', 'H1', header_text)
 
         # extract the text and tag from the content
+        data = response.xpath(Xpath.news_release_date.value).get()
+        filling_dictionary_by_rows(item, 'DATE', '', data)
+
+        filling_dictionary_by_rows(item, 'T', 'H1', header_text)
+
         content_text = response.xpath(Xpath.element_p.value)
 
         for el in content_text:
