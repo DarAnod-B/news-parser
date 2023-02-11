@@ -21,9 +21,9 @@ headline_lists = ['H1', 'H2']
 
 
 # Файл, полученный в Google Developer Console
-CREDENTIALS_FILE = r'C:\Programming\GitHub\news-parser\dutchnews\data\speedy-web.json'
+CREDENTIALS_FILE = r''
 # ID Google Sheets документа (можно взять из его URL)
-spreadsheet_id = '1HCSbGfdx9cU2it9Sj3dMTzUfESwDHoATlo19uKb5eoI'
+SPREADSHEET_ID = r''
 
 
 class DutchnewsPipeline:
@@ -140,7 +140,7 @@ class DutchnewsPipeline:
             gc = gspread.authorize(credentials)
 
             # open a google sheet
-            gs = gc.open_by_key(spreadsheet_id)
+            gs = gc.open_by_key(SPREADSHEET_ID)
 
             # select a work sheet from its name
             worksheet1 = gs.worksheet('Sheet1')

@@ -19,31 +19,22 @@ class DutchNewsSpider(scrapy.Spider):
     custom_settings = {'FEED_URI': 'dutchnews_%(time)s.xlsx',
                        'FEED_FORMAT': 'xlsx'}
 
+
+
     def parse(self, response):
         # follow the list of links to news categories
-        links = response.xpath(Xpath.news_categories.value).getall()[:1]
+        links = response.xpath(Xpath.news_categories.value).getall()
         for link in links:
             yield response.follow(link, self.parse_news)
 
-    # def parse(self, response):
-    #     # follow the list of links to news categories
-    #     links = response.xpath(Xpath.news_categories.value).getall()
-    #     for link in links:
-    #         yield response.follow(link, self.parse_news)
+
 
     def parse_news(self, response):
         # extract the text from the header of each news article
         links = response.xpath(
-            Xpath.news_article.value).getall()[:1]
+            Xpath.news_article.value).getall()
         for link in links:
             yield response.follow(link, self.parse_item)
-
-    # def parse_news(self, response):
-    #     # extract the text from the header of each news article
-    #     links = response.xpath(
-    #         Xpath.news_article.value).getall()
-    #     for link in links:
-    #         yield response.follow(link, self.parse_item)
 
     def parse_item(self, response):
         def filling_dictionary_by_rows(item, type_cell, options_cell, english_cell):
