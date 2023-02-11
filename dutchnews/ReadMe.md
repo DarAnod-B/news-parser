@@ -2,11 +2,11 @@
 **Настройка проекта:**
 1. Нужно получить API от google cloude (весьма понятное объяснение https://codesolid.com/google-sheets-in-python-and-pandas/)в виде json файла.
 2. Поместить json файл в проект, желательно в отдельную папку data (...\news-parser\dutchnews\data)
-3. Внутри ...\news-parsernews-parser\dutchnews\pipelines.py нужно найти константу CREDENTIALS_FILE и указать в кавычках полный путь (можно и относительный, но иногда он не находит файл по нему).
+3. В news-parser\dutchnews\pipelines.py нужно найти константу CREDENTIALS_FILE и указать в кавычках полный путь (можно и относительный, но иногда он не находит файл по нему).
 4. Открыть json файл и скопировать из него client_email.
 5. Взять  таблицу, которую вы используете для выгрузки данных(в https://docs.google.com/) и нажать на кнопку "настройки доступа" добавить client_email и нажать отправить.
-6. Внутри news-parser\dutchnews\pipelines.py нужно найти константу SPREADSHEET_ID и указать в кавычках ID таблицы его можно найти в URL (Выглядит примерно так: 3ln1rhANfDqyyaEtIZokFfuVivgrW4L3io20)
-7. 
+6. В news-parser\dutchnews\pipelines.py нужно найти константу SPREADSHEET_ID и указать в кавычках ID таблицы его можно найти в URL (Выглядит примерно так: 3ln1rhANfDqyyaEtIZokFfuVivgrW4L3io20)
+7. В news-parser\dutchnews\pipelines.py указать в openai.api_key API от open_AI. 
 
 
 **Запуск проекта:**

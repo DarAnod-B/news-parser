@@ -10,13 +10,12 @@ import gspread
 from nltk.tokenize import sent_tokenize
 import pandas as pd
 import openai
-import os
 import time
 import nltk
 nltk.download('punkt')
 
 
-openai.api_key = os.environ.get('gpt_api_key')
+openai.api_key = r''
 headline_lists = ['H1', 'H2']
 
 
