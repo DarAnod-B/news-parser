@@ -4,12 +4,11 @@ from enum import Enum
 
 class Xpath(Enum):
     news_categories = r'//*[@id="body"]/section/div/div[1]/div/h3/a/@href'
-    news_article = r'//*[@id="body"]/section/div/div[1]/div[3]/ul/li/a/@href' 
+    news_article = r'//*[@id="body"]/section/div/div[1]/div[3]/ul/li/a/@href'
     text_header = r'//header/h1/text()'
     element_p = r'//div[contains(@class, "entry-content ")]/p'
     elements_containing_text = r'./text() | a/text() | ./strong/text()'
     text_inside_paragraphs = r'./text() | a/text()'
-    
 
 
 class DutchNewsSpider(scrapy.Spider):
@@ -39,7 +38,6 @@ class DutchNewsSpider(scrapy.Spider):
         for link in links:
             yield response.follow(link, self.parse_item)
 
-
     # def parse_news(self, response):
     #     # extract the text from the header of each news article
     #     links = response.xpath(
@@ -48,26 +46,27 @@ class DutchNewsSpider(scrapy.Spider):
     #         yield response.follow(link, self.parse_item)
 
     def parse_item(self, response):
-        item = {}
-        tags = []
-        texts = []
+        def filling_dictionary_by_rows(item, type_cell, options_cell, english_cell):
+            item['Type'].append(type_cell)
+            item['Options'].append(options_cell)
+            item['English'].append(english_cell)
+
+        item = {'Type': [], 'Options': [], 'English': []}
 
         # extract the text and tag from the header
         header_text = response.xpath(Xpath.text_header.value).get()
-        tags.append('H1')
-        texts.append(header_text)
+        filling_dictionary_by_rows(item, 'H', '', header_text)
+        filling_dictionary_by_rows(item, 'T', 'H1', header_text)
 
         # extract the text and tag from the content
-        content_text = response.xpath(Xpath.element_p.value)  
+        content_text = response.xpath(Xpath.element_p.value)
 
         for el in content_text:
             text = el.xpath(Xpath.elements_containing_text.value).getall()
             full_text = ''.join(text)
-            tag = 'p' if el.xpath(Xpath.text_inside_paragraphs.value).getall() else 'H2'
-            tags.append(tag)
-            texts.append(full_text)
-
-        item['tag'] = tags
-        item['text'] = texts
-
+            if el.xpath(Xpath.text_inside_paragraphs.value).getall():
+                filling_dictionary_by_rows(item, 'T', '', full_text)
+            else:
+                filling_dictionary_by_rows(item, 'T', 'H2', full_text)
+        print(item)
         yield item
