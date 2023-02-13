@@ -49,7 +49,7 @@ class DutchNewsSpider(scrapy.Spider):
             None
         """
         # follow the list of links to news categories
-        links = response.xpath(Xpath.news_categories.value).getall()[:1]
+        links = response.xpath(Xpath.news_categories.value).getall()
         for link in links:
             yield response.follow(
                 link,
@@ -70,7 +70,7 @@ class DutchNewsSpider(scrapy.Spider):
             None
         """
         # extract the text from the header of each news article
-        links = response.xpath(Xpath.news_article.value).getall()[:1]
+        links = response.xpath(Xpath.news_article.value).getall()
         for link in links:
             yield response.follow(
                 link,
