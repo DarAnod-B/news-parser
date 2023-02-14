@@ -3,7 +3,6 @@
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: https://docs.scrapy.org/en/latest/topics/item-pipeline.html
 
-import os
 import time
 from oauth2client.service_account import (
     ServiceAccountCredentials,
@@ -21,11 +20,12 @@ import nltk
 from enum import Enum
 import configparser
 from pathlib import Path
+from deep_translator import GoogleTranslator
 
 nltk.download("punkt")
 
 
-path_to_config = Path(__file__).parent.joinpath('data', 'config.ini')
+path_to_config = Path(__file__).parent.joinpath("data", "config.ini")
 config = configparser.ConfigParser()
 config.read(path_to_config, encoding="utf-8")
 
@@ -47,6 +47,7 @@ class StopTimeBetweenRequests(Enum):
     """
     Перечисления, переменных содержащих время остановки исполнения программы  между запросами.
     """
+
     usual = 30
     emergency = 60
 
@@ -55,13 +56,7 @@ class DutchnewsPipeline:
     def __init__(
         self,
     ):
-        self.df = pd.DataFrame(
-            columns=[
-                "Type",
-                "English",
-                "Options",
-            ]
-        )
+        self.df = pd.DataFrame()
 
     def process_item(self, item, spider):
         """
@@ -85,6 +80,7 @@ class DutchnewsPipeline:
 
         df_latest_news = pd.DataFrame(item)
         df_latest_news = self.splitting_the_text_into_sentences(df_latest_news)
+        df_latest_news = self.translation_of_news(df_latest_news)
         df_latest_news = df_latest_news.applymap(self.clean_text)
 
         self.df = self.df.append(
@@ -93,6 +89,28 @@ class DutchnewsPipeline:
         )
 
         return df_latest_news
+
+    def translation_of_news(self, df: pd.DataFrame) -> pd.DataFrame:
+        from_language = "en"
+        to_language = {"ru": "Russian",
+                       "nl": "Dutch",
+                       "it": "Italian",
+                       "de": "German",
+                       "es": "Spanish",
+                       "fr": "French",
+                       "pt": "Portugese"}
+
+
+        for lang, col_name in to_language.items():
+            translated_text = []
+            for row in range(df.shape[0]):
+                translated = GoogleTranslator(
+                    source=from_language, target=lang
+                ).translate(df["English"][row])
+                translated_text.append(translated)
+            df[col_name] = translated_text
+        return df
+
 
     def clean_text(
         self,
@@ -171,8 +189,8 @@ class DutchnewsPipeline:
         self,
         df: pd.DataFrame,
     ) -> pd.DataFrame:
-        """ 
-        Объединяет несколько предложений из словаря в единый текст.
+        """
+        Разделение текста по предложениям на разные строки таблицы.
 
         Parameters:
         item (dict): Входной словарь, содержащий данные, которые необходимо обработать.
@@ -183,17 +201,17 @@ class DutchnewsPipeline:
         # Split the text column into sentences
         df = df.assign(English=df["English"].apply(lambda x: sent_tokenize(x)))
         # Convert the list of sentences in each row into separate rows
-        df = df.explode("English")
+        df = df.explode("English").reset_index(drop=True)
         return df
 
     def text_rewriting(
         self,
         item: dict,
     ) -> dict:
-        """ 
+        """
         Перепишите текст, используя языковую модель GPT-3 OpenAI.
 
-        Этот метод использует языковую модель GPT-3 OpenAI для 
+        Этот метод использует языковую модель GPT-3 OpenAI для
         рерайта текста на ангойиском языке.
 
         Parameters:
@@ -210,8 +228,8 @@ class DutchnewsPipeline:
         ):
             if (
                 options_cell not in HEADLINE_LISTS
-               and type_cell not in EXCLUDED_TYPE_CELL_FROM_REWRITE
-               ):
+                and type_cell not in EXCLUDED_TYPE_CELL_FROM_REWRITE
+            ):
 
                 prompt = (
                     """Rewrite the following sentence, 
@@ -255,7 +273,7 @@ class DutchnewsPipeline:
     ):
         def preparing_a_dataframe(df: pd.DataFrame) -> None:
             """
-            Эта функция подготавливает dataframe, добавляя новые столбцы 
+            Эта функция подготавливает dataframe, добавляя новые столбцы
             "Placement", "Media" и "Voice" и изменяя порядок столбцов.
 
             Parameters:
@@ -277,7 +295,14 @@ class DutchnewsPipeline:
                     "Type",
                     "Options",
                     "Voice",
+                    "Russian",
                     "English",
+                    "Dutch",
+                    "Italian",
+                    "German",
+                    "Spanish",
+                    "French",
+                    "Portugese"
                 ]
             ]
             return df
@@ -317,8 +342,9 @@ class DutchnewsPipeline:
                 dataframe=df,
                 include_index=False,
                 include_column_header=True,
-                resize=True,
+                resize=True
             )
+            
 
         self.df = preparing_a_dataframe(self.df)
         saving_to_google_sheets(self.df)
