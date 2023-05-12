@@ -1,6 +1,6 @@
 ## Инструкция по использованию 
 **Настройка проекта:**
-1. Нужно получить API от google cloude (весьма понятное объяснение https://codesolid.com/google-sheets-in-python-and-pandas/)в виде json файла.
+1. Нужно получить API от google cloude (Гайд: https://codesolid.com/google-sheets-in-python-and-pandas/) в виде json файла.
 2. Поместить json файл в проект, желательно в отдельную папку data (...\news-parser\dutchnews\data)
 3. В config.ini нужно найти константу CREDENTIALS_FILE и указать без кавычек полный путь.
 4. Открыть json файл и скопировать из него client_email.
